@@ -2,12 +2,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/component
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { User } from "@/app/page";
-import { Sceleton } from "@/components/ui/skeleton";
-
 
 
 export async function getStaticParams() {
     const response = await fetch('https://jsonplaceholder.typicode.com/users');
+    if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.statusText}`);
+    }
     const users: User[] = await response.json();
     return users.map((user) => ({
         params: { id: user.id.toString() },
@@ -24,9 +25,13 @@ export default async function UserPage({
         const response = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
         const user: User = await response.json();
 
+        if (!user) {
+            throw new Error('User not found');
+        }
+
         return (
-            <div className="flex justify-center gap-4 m-4">
-                
+            <main>
+                <div className="flex justify-center gap-4 m-4">
                         <Card>
                             <CardHeader>
                                 <CardTitle>{user.name}</CardTitle>
@@ -45,7 +50,8 @@ export default async function UserPage({
                                 </Button>
                             </CardFooter>
                         </Card>
-            </div>
+                </div>
+            </main>
         );
     }
 
